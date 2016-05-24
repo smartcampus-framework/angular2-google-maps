@@ -37,7 +37,7 @@ import {MouseEvent} from '../events';
     'longitude', 'latitude', 'zoom', 'disableDoubleClickZoom', 'disableDefaultUI', 'scrollwheel',
     'backgroundColor', 'draggableCursor', 'draggingCursor', 'keyboardShortcuts', 'zoomControl'
   ],
-  outputs: ['mapClick', 'mapRightClick', 'mapDblClick', 'centerChange'],
+  outputs: ['mapClick', 'mapRightClick', 'mapDblClick', 'centerChange', 'idleChange'],
   host: {'[class.sebm-google-map-container]': 'true'},
   styles: [`
     .sebm-google-map-container-inner {
@@ -140,6 +140,11 @@ export class SebmGoogleMap implements OnChanges,
    */
   centerChange: EventEmitter<LatLngLiteral> = new EventEmitter<LatLngLiteral>();
 
+  /**
+   * This event emitter is fired when the map goes into idle state.
+   */
+  idleChange: EventEmitter<any> = new EventEmitter<any>();
+
   constructor(private _elem: ElementRef, private _mapsWrapper: GoogleMapsAPIWrapper) {}
 
   /** @internal */
@@ -162,6 +167,7 @@ export class SebmGoogleMap implements OnChanges,
     this._handleMapCenterChange();
     this._handleMapZoomChange();
     this._handleMapMouseEvents();
+    this._handleMapIdleChange();
   }
 
   /* @internal */
@@ -271,4 +277,11 @@ export class SebmGoogleMap implements OnChanges,
           });
     });
   }
+
+  private _handleMapIdleChange() {
+    this._mapsWrapper.subscribeToMapEvent<void>('idle').subscribe(() => {
+      this.idleChange.emit(null);
+    });
+  }
+
 }
